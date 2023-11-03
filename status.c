@@ -26,20 +26,24 @@ int main(int argc, char *argv[]) {
 
 void printJSON(int battery, char *batcolour, char *date) {
 	printf("\
-	[\n\
-		{\n\
-			\"full_text\": \"%d%%\",\n\
-			\"background\": \"#%s\",\n\
-			\"align\": \"center\",\n\
-			\"color\": \"#000000\"\n\
-		},\n\
-		{\n\
-			\"full_text\": \"%s\",\n\
-			\"background\": \"#6c71c6\",\n\
-			\"color\": \"#000000\",\n\
-			\"align\": \"center\"\n\
-		}\n\
+	[\
+		{\
+			\"full_text\": \"%d%%\",\
+			\"background\": \"#%s\",\
+			\"align\": \"center\",\
+			\"color\": \"#000000\"\
+		},\
+		{\
+			\"full_text\": \"%s\",\
+			\"background\": \"#6c71c6\",\
+			\"color\": \"#000000\",\
+			\"align\": \"center\"\
+		}\
 	],\n", battery, batcolour, date);
+
+	// MAGIC
+	fflush(stdout);
+	// MAGIC END
 }
 
 int batpercent(FILE *fp) {
@@ -48,6 +52,8 @@ int batpercent(FILE *fp) {
 
 	for (; (c = getc(fp)) >= '0' && c <= '9'; bat *= 10)
 		bat += c - '0';
+
+	while (getc(fp) != EOF); // stupid housekeeping
 
 	return bat/10;
 }
