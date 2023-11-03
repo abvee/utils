@@ -2,33 +2,35 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(int battery, char *batcolour, char *date);
-int batpercent(FILE *fp);
+void printJSON(int battery, char *batcolour, char *date, float temp);
+int atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
 
-// global variables
-FILE *batfile, *colourfile;
-
 int main(int argc, char *argv[]) {
+	FILE *batfile, *colourfile, *tempfile;
+
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
+	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
+
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(batpercent(batfile), getcolour(colourfile), fdate());
+		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
 		fseek(batfile, 0, SEEK_SET);
+		fseek(tempfile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
 
 // print the JSON output and flush buffer
-void printJSON(int battery, char *batcolour, char *date) {
+void printJSON(int battery, char *batcolour, char *date, float temp) {
 	printf("\
 	[\
 		{\
@@ -38,29 +40,35 @@ void printJSON(int battery, char *batcolour, char *date) {
 			\"color\": \"#000000\"\
 		},\
 		{\
+			\"full_text\": \"%.1f\",\
+			\"background\": \"#419fff\",\
+			\"color\": \"#000000\",\
+			\"align\": \"center\"\
+		},\
+		{\
 			\"full_text\": \"%s\",\
 			\"background\": \"#6c71c6\",\
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		}\
-	],\n", battery, batcolour, date);
+	],\n", battery, batcolour, temp, date);
 
 	// MAGIC
 	fflush(stdout);
 	// MAGIC END
 }
 
-// battery percentage
-int batpercent(FILE *fp) {
-	int bat = 0;
+// convert string to int. use for battery percentage and temp
+int atoi(FILE *fp) {
+	int x = 0;
 	char c;
 
-	for (; (c = getc(fp)) >= '0' && c <= '9'; bat *= 10)
-		bat += c - '0';
+	for (; (c = getc(fp)) >= '0' && c <= '9'; x *= 10)
+		x += c - '0';
 
 	while (getc(fp) != EOF); // stupid housekeeping
 
-	return bat/10;
+	return x/10;
 }
 
 // check if battery is charging or not, return green if it is, red if not
