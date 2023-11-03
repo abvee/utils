@@ -15,29 +15,32 @@ int main(int argc, char *argv[]) {
 
 	char batcolour[7]; // battery panel colour
 
-	while (sleep(5) == 0) {
+	printf("{\"version\": 1,\"click_events\": true}\n");
+	printf("[\n");
+	printf("[],\n");
+	do {
 		getcolour(batcolour, colourfile);
 		printJSON(batpercent(batfile), batcolour, fdate());
 	}
+	while (sleep(5) == 0);
 }
 
 void printJSON(int battery, char *batcolour, char *date) {
 	printf("\
-	[\
-		{\
-			\"full_text\": \"%d%%\",\
-			\"background\": \"#%s\",\
-			\"align\": \"center\",\
-			\"color\": \"#000000\"\
-		},\
-		{\
-			\"full_text\": \"%s\",\
-			\"background\": \"#6c71c6\",\
-			\"color\": \"#000000\",\
-			\"align\": \"center\"\
-		}\
-	],\
-	", battery, batcolour, date);
+	[\n\
+		{\n\
+			\"full_text\": \"%d%%\",\n\
+			\"background\": \"#%s\",\n\
+			\"align\": \"center\",\n\
+			\"color\": \"#000000\"\n\
+		},\n\
+		{\n\
+			\"full_text\": \"%s\",\n\
+			\"background\": \"#6c71c6\",\n\
+			\"color\": \"#000000\",\n\
+			\"align\": \"center\"\n\
+		}\n\
+	],\n", battery, batcolour, date);
 }
 
 int batpercent(FILE *fp) {
