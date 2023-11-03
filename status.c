@@ -3,8 +3,8 @@
 
 void printJSON(int battery, char *batcolour, char *date);
 int batpercent(FILE *fp);
-void getcolour(char batcolour[], FILE *statfile);
-char *fdate(); // get current date
+char* getcolour(FILE *statfile);
+char* fdate(); // get current date
 
 // global variables
 FILE *batfile, *colourfile;
@@ -13,14 +13,13 @@ int main(int argc, char *argv[]) {
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
 
-	char batcolour[7]; // battery panel colour
-
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		getcolour(batcolour, colourfile);
-		printJSON(batpercent(batfile), batcolour, fdate());
+		printJSON(batpercent(batfile), getcolour(colourfile), fdate());
+		fseek(colourfile, 0, SEEK_SET);
+		fseek(batfile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
@@ -53,15 +52,14 @@ int batpercent(FILE *fp) {
 	return bat/10;
 }
 
-void stcopy(char *from, char *to) {
-	while (*to++ = *from++)
-		;
-}
-void getcolour(char batcolour[7], FILE *statfile) {
-	if (getc(statfile) == 'D')
-		stcopy("bf616a", batcolour);
-	else
-		stcopy("a3be8c", batcolour);
+char* getcolour(FILE *statfile) {
+	char c = getc(statfile);
+
+	while (getc(statfile) != EOF); // stupid housekeeping
+
+	if (c == 'D')
+		return "bf616a";
+	return "a3be8c";
 }
 
 // Return day of the week
@@ -85,7 +83,7 @@ char *day(int x) {
 }
 
 #include <time.h>
-char *fdate() {
+char* fdate() {
 
 	// MAGIC
 	time_t t = time(NULL);
