@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+// prototypes
 void printJSON(int battery, char *batcolour, char *date);
 int batpercent(FILE *fp);
 char* getcolour(FILE *statfile);
-char* fdate(); // get current date
+char* fdate(); // get current date, in specified format
 
 // global variables
 FILE *batfile, *colourfile;
@@ -18,12 +19,15 @@ int main(int argc, char *argv[]) {
 	printf("[],\n");
 	do {
 		printJSON(batpercent(batfile), getcolour(colourfile), fdate());
+
+		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
 		fseek(batfile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
 
+// print the JSON output and flush buffer
 void printJSON(int battery, char *batcolour, char *date) {
 	printf("\
 	[\
@@ -46,6 +50,7 @@ void printJSON(int battery, char *batcolour, char *date) {
 	// MAGIC END
 }
 
+// battery percentage
 int batpercent(FILE *fp) {
 	int bat = 0;
 	char c;
@@ -58,6 +63,7 @@ int batpercent(FILE *fp) {
 	return bat/10;
 }
 
+// check if battery is charging or not, return green if it is, red if not
 char* getcolour(FILE *statfile) {
 	char c = getc(statfile);
 
