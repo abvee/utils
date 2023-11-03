@@ -41,7 +41,7 @@ void printJSON(int battery, char *batcolour, char *date, float temp) {
 		},\
 		{\
 			\"full_text\": \"%.1f\",\
-			\"background\": \"#419fff\",\
+			\"background\": \"#4170d8\",\
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		},\
