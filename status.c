@@ -41,7 +41,7 @@ void printJSON(int battery, char *batcolour, char *date, float temp) {
 		},\
 		{\
 			\"full_text\": \"%.1f\",\
-			\"background\": \"#4170d8\",\
+			\"background\": \"#1c78be\",\
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		},\
@@ -66,7 +66,7 @@ int atoi(FILE *fp) {
 	for (; (c = getc(fp)) >= '0' && c <= '9'; x *= 10)
 		x += c - '0';
 
-	while (getc(fp) != EOF); // stupid housekeeping
+	fseek(fp, 0, SEEK_END); // stupid housekeeping
 
 	return x/10;
 }
@@ -75,7 +75,7 @@ int atoi(FILE *fp) {
 char* getcolour(FILE *statfile) {
 	char c = getc(statfile);
 
-	while (getc(statfile) != EOF); // stupid housekeeping
+	fseek(statfile, 0, SEEK_END); // stupid housekeeping
 
 	if (c == 'D')
 		return "bf616a";
