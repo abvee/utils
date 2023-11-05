@@ -2,45 +2,54 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(int battery, char *batcolour, char *date, float temp);
-unsigned int atoi(FILE *fp);
+void printJSON(int battery, char *batcolour, char *date, float temp, float power);
+unsigned long atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
 
 int main(int argc, char *argv[]) {
-	FILE *batfile, *colourfile, *tempfile;
+	FILE *batfile, *colourfile, *tempfile, *volfile, *currfile;
 
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
 	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
-
+	volfile = fopen("/sys/class/power_supply/BAT0/voltage_now", "r");
+	currfile = fopen("/sys/class/power_supply/BAT0/current_now", "r");
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000.0);
+		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000.0, (atoi(volfile) * atoi(currfile))/1000000000000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
 		fseek(batfile, 0, SEEK_SET);
 		fseek(tempfile, 0, SEEK_SET);
+		fseek(volfile, 0, SEEK_SET);
+		fseek(currfile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
 
 // print the JSON output and flush buffer
-void printJSON(int battery, char *batcolour, char *date, float temp) {
+void printJSON(int battery, char *batcolour, char *date, float temp, float power) {
 	printf("\
 	[\
 		{\
-			\"full_text\": \"%d%%\",\
+			\"full_text\": \"%ld%%\",\
 			\"background\": \"#%s\",\
 			\"align\": \"center\",\
 			\"color\": \"#000000\"\
 		},\
 		{\
-			\"full_text\": \"%.1f\",\
+			\"full_text\": \"%.1fW\",\
+			\"background\": \"#eee8d5\",\
+			\"align\": \"center\",\
+			\"color\": \"#000000\"\
+		},\
+		{\
+			\"full_text\": \"%.1fC\",\
 			\"background\": \"#1c78be\",\
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
@@ -51,7 +60,7 @@ void printJSON(int battery, char *batcolour, char *date, float temp) {
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		}\
-	],\n", battery, batcolour, temp, date);
+	],\n", battery, batcolour, power, temp, date);
 
 	// MAGIC
 	fflush(stdout);
@@ -59,7 +68,7 @@ void printJSON(int battery, char *batcolour, char *date, float temp) {
 }
 
 // convert string to int. use for battery percentage and temp
-unsigned int atoi(FILE *fp) {
+unsigned long atoi(FILE *fp) {
 	unsigned int x = 0;
 	char c;
 
