@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(int battery, char *batcolour, char *date, float temp, float power);
+void printJSON(int battery, char *batcolour, char *date, int temp, float power);
 unsigned long atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000.0, (atoi(volfile) * atoi(currfile))/1000000000000.0);
+		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, (atoi(volfile) * atoi(currfile))/1000000000000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
@@ -33,23 +33,23 @@ int main(int argc, char *argv[]) {
 }
 
 // print the JSON output and flush buffer
-void printJSON(int battery, char *batcolour, char *date, float temp, float power) {
+void printJSON(int battery, char *batcolour, char *date, int temp, float power) {
 	printf("\
 	[\
 		{\
-			\"full_text\": \"%ld%%\",\
+			\"full_text\": \"%d%%\",\
 			\"background\": \"#%s\",\
 			\"align\": \"center\",\
 			\"color\": \"#000000\"\
 		},\
 		{\
 			\"full_text\": \"%.1fW\",\
-			\"background\": \"#eee8d5\",\
+			\"background\": \"#657b83\",\
 			\"align\": \"center\",\
 			\"color\": \"#000000\"\
 		},\
 		{\
-			\"full_text\": \"%.1fC\",\
+			\"full_text\": \"%d°C\",\
 			\"background\": \"#1c78be\",\
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
