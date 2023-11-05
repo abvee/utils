@@ -3,7 +3,7 @@
 
 // prototypes
 void printJSON(int battery, char *batcolour, char *date, float temp);
-int atoi(FILE *fp);
+unsigned int atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
 
@@ -59,8 +59,8 @@ void printJSON(int battery, char *batcolour, char *date, float temp) {
 }
 
 // convert string to int. use for battery percentage and temp
-int atoi(FILE *fp) {
-	int x = 0;
+unsigned int atoi(FILE *fp) {
+	unsigned int x = 0;
 	char c;
 
 	for (; (c = getc(fp)) >= '0' && c <= '9'; x *= 10)
