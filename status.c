@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(int battery, char *batcolour, char *date, int temp, float power);
+void printJSON(int battery, char *batcolour, char *date, int, float);
 unsigned long atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
 }
 
 // print the JSON output and flush buffer
+// 6c98b7
 void printJSON(int battery, char *batcolour, char *date, int temp, float power) {
 	printf("\
 	[\
@@ -44,13 +45,14 @@ void printJSON(int battery, char *batcolour, char *date, int temp, float power) 
 		},\
 		{\
 			\"full_text\": \"%.1fW\",\
-			\"background\": \"#657b83\",\
+			\"background\": \"#575f75\",\
 			\"align\": \"center\",\
 			\"color\": \"#000000\"\
 		},\
 		{\
 			\"full_text\": \"%d°C\",\
-			\"background\": \"#1c78be\",\
+			\"background\": \"#5887aa\",\
+5c8db2
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		},\
