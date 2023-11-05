@@ -67,7 +67,12 @@ void printJSON(int battery, char *batcolour, char *date, float temp, float power
 	// MAGIC END
 }
 
-// convert string to int. use for battery percentage and temp
+/*
+used for battery, power and temperature
+
+We used unsigned long because the volatge and current are very very
+large
+*/
 unsigned long atoi(FILE *fp) {
 	unsigned int x = 0;
 	char c;
