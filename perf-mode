@@ -50,5 +50,8 @@ bat () {
 if [[ $1 == "-p" ]];then
 	perf
 	exit 0
+elif [[ $1 == "-h" || $1 == "--help" ]]; then
+	printf "USAGE:\n-p\t\tset performance mode\n[run without flags]\tsets to powersave mode\n"
+	exit 0
 fi
 bat
