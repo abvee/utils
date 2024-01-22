@@ -2,25 +2,27 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(int battery, char *batcolour, char *date, int, float);
+void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int, float);
 unsigned long atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
+char* getperf(FILE *fp);
 
 int main(int argc, char *argv[]) {
-	FILE *batfile, *colourfile, *tempfile, *volfile, *currfile;
+	FILE *batfile, *colourfile, *tempfile, *volfile, *currfile, *perffile;
 
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
 	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
 	volfile = fopen("/sys/class/power_supply/BAT0/voltage_now", "r");
 	currfile = fopen("/sys/class/power_supply/BAT0/current_now", "r");
+	perffile = fopen("/tmp/mode", "r"); // The perforamnce file. Ideally contains only one character
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, (atoi(volfile) * atoi(currfile))/1000000000000.0);
+		printJSON(getperf(perffile), atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, (atoi(volfile) * atoi(currfile))/1000000000000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
@@ -33,9 +35,15 @@ int main(int argc, char *argv[]) {
 }
 
 // print the JSON output and flush buffer
-void printJSON(int battery, char *batcolour, char *date, int temp, float power) {
+void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int temp, float power) {
 	printf("\
 	[\
+		{\
+			\"full_text\": \" \",\
+			\"background\": \"#%s\",\
+			\"align\": \"center\",\
+			\"color\": \"#000000\"\
+		},\
 		{\
 			\"full_text\": \"%d%%\",\
 			\"background\": \"#%s\",\
@@ -51,7 +59,6 @@ void printJSON(int battery, char *batcolour, char *date, int temp, float power) 
 		{\
 			\"full_text\": \"%d°C\",\
 			\"background\": \"#5887aa\",\
-5c8db2
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		},\
@@ -61,11 +68,25 @@ void printJSON(int battery, char *batcolour, char *date, int temp, float power) 
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		}\
-	],\n", battery, batcolour, power, temp, date);
+	],\n", perfcolour, battery, batcolour, power, temp, date);
 
 	// MAGIC
 	fflush(stdout);
 	// MAGIC END
+}
+
+/*
+Read /tmp/mode
+
+performance mode (1) - return orange else return black
+*/
+char* getperf(FILE *fp) {
+	if (getc(fp) == '1') {
+		fseek(fp, 0, SEEK_END);
+		return "cc8624";
+	}
+	fseek(fp, 0, SEEK_END);
+	return "000000";
 }
 
 /*
