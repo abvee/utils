@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
 }
 
 // print the JSON output and flush buffer
-// 6c98b7
 void printJSON(int battery, char *batcolour, char *date, int temp, float power) {
 	printf("\
 	[\
