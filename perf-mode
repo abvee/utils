@@ -1,3 +1,54 @@
-#!/bin/bash
+#!/bin/bash -x
 # Script to change the performance mode of the computer
 # Refer to the asus-s15-oled repository for details
+
+# /tmp/mode:
+# 1 - In performance mode
+# 0 - In performance mode
+
+if (( $UID != 0 )); then
+	echo "Please run as root"
+	exit 1
+fi
+
+# Performance mode
+perf () {
+	# enable turbo
+	echo 0 > /sys/devices/system/cpu/intel_pstate/no_turbo
+
+	# set governor to performance
+	echo performance | tee /sys/devices/system/cpu/cpu?/cpufreq/scaling_governor
+
+	# set perf bias to performance
+	cpupower set --perf-bias 0
+
+	# set energy performance preference
+	echo performance | tee /sys/devices/system/cpu/cpufreq/policy0/energy_performance_preference
+
+	echo 1 > /tmp/mode
+	return
+}
+
+# battery saver mode
+bat () {
+	# disable turbo
+	echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
+
+	# set governor to powersave
+	echo powersave | tee /sys/devices/system/cpu/cpu?/cpufreq/scaling_governor
+
+	# set perf bias to powersave
+	cpupower set --perf-bias 15
+
+	# set energy performance preference
+	echo power | tee /sys/devices/system/cpu/cpufreq/policy0/energy_performance_preference
+
+	echo 0 > /tmp/mode
+	return
+}
+
+if [[ $1 == "-p" ]];then
+	perf
+	exit 0
+fi
+bat
