@@ -82,7 +82,7 @@ Read /tmp/mode
 performance mode (1) - return orange else return black
 */
 char* getperf(FILE *fp) {
-	if (getc(fp) == 1) {
+	if (getc(fp) == '1') {
 		fseek(fp, 0, SEEK_END);
 		return "cc8624";
 	}
