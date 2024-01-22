@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
 		fseek(tempfile, 0, SEEK_SET);
 		fseek(volfile, 0, SEEK_SET);
 		fseek(currfile, 0, SEEK_SET);
+		fseek(perffile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
