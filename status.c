@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
 	volfile = fopen("/sys/class/power_supply/BAT0/voltage_now", "r");
 	currfile = fopen("/sys/class/power_supply/BAT0/current_now", "r");
-	perffile = fopen("/tmp/mode", "r"); // The perforamnce file. Ideally contains only one character
+	perffile = fopen("/sys/devices/system/cpu/intel_pstate/no_turbo", "r"); // The perforamnce file. Ideally contains only one character
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
@@ -77,16 +77,18 @@ void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int t
 }
 
 /*
-Read /tmp/mode
+Read /sys/devices/system/cpu/intel_pstate/no_turbo
 
-performance mode (1) - return orange else return black
+if it's 0, then in performance mode, else powersave.
 */
 char* getperf(FILE *fp) {
-	if (getc(fp) == '1') {
-		fseek(fp, 0, SEEK_END);
+	char c = getc(fp);
+	fseek(fp, 0, SEEK_END);
+
+	// 0 - turbo enabled, in performance mode
+	if (c == '0') {
 		return "cc8624";
 	}
-	fseek(fp, 0, SEEK_END);
 	return "000000";
 }
 
