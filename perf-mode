@@ -25,7 +25,6 @@ perf () {
 	# set energy performance preference
 	echo performance | tee /sys/devices/system/cpu/cpufreq/policy?/energy_performance_preference
 
-	su abv -c 'echo 1 > /tmp/mode'
 	return
 }
 
@@ -43,7 +42,6 @@ bat () {
 	# set energy performance preference
 	echo power | tee /sys/devices/system/cpu/cpufreq/policy?/energy_performance_preference
 
-	su abv -c 'echo 0 > /tmp/mode'
 	return
 }
 
