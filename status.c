@@ -80,6 +80,10 @@ void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int t
 Read /sys/devices/system/cpu/intel_pstate/no_turbo
 
 if it's 0, then in performance mode, else powersave.
+
+Notice that this is an exact copy of the getcolour function. I have however,
+chose to keep this 2 seperate functions, rather than a single function with 3
+additional arguments.
 */
 char* getperf(FILE *fp) {
 	char c = getc(fp);
