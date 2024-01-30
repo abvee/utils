@@ -2,10 +2,6 @@
 # Script to change the performance mode of the computer
 # Refer to the asus-s15-oled repository for details
 
-# /tmp/mode:
-# 1 - In performance mode
-# 0 - In performance mode
-
 if (( $UID != 0 )); then
 	echo "Please run as root"
 	exit 1
