@@ -9,27 +9,25 @@ char* fdate(); // get current date, in specified format
 char* getperf(FILE *fp);
 
 int main(int argc, char *argv[]) {
-	FILE *batfile, *colourfile, *tempfile, *volfile, *currfile, *perffile;
+	FILE *batfile, *colourfile, *tempfile, *perffile, *powerfile;
 
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
 	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
-	volfile = fopen("/sys/class/power_supply/BAT0/voltage_now", "r");
-	currfile = fopen("/sys/class/power_supply/BAT0/current_now", "r");
+	powerfile = fopen("/sys/class/power_supply/BAT0/power_now", "r");
 	perffile = fopen("/sys/devices/system/cpu/intel_pstate/no_turbo", "r"); // The perforamnce file. Ideally contains only one character
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(getperf(perffile), atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, (atoi(volfile) * atoi(currfile))/1000000000000.0);
+		printJSON(getperf(perffile), atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, atoi(powerfile)/1000000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
 		fseek(batfile, 0, SEEK_SET);
 		fseek(tempfile, 0, SEEK_SET);
-		fseek(volfile, 0, SEEK_SET);
-		fseek(currfile, 0, SEEK_SET);
+		fseek(powerfile, 0, SEEK_SET);
 		fseek(perffile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
