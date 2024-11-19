@@ -2,47 +2,39 @@
 #include <unistd.h>
 
 // prototypes
-void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int, float);
+void printJSON(int battery, char *batcolour, char *date, int temp, float power);
 unsigned long atoi(FILE *fp);
 char* getcolour(FILE *statfile);
 char* fdate(); // get current date, in specified format
 char* getperf(FILE *fp);
 
 int main(int argc, char *argv[]) {
-	FILE *batfile, *colourfile, *tempfile, *perffile, *powerfile;
+	FILE *batfile, *colourfile, *tempfile, *powerfile;
 
 	batfile = fopen("/sys/class/power_supply/BAT0/capacity", "r");
 	colourfile = fopen("/sys/class/power_supply/BAT0/status", "r");
 	tempfile = fopen("/sys/devices/virtual/thermal/thermal_zone9/temp", "r");
 	powerfile = fopen("/sys/class/power_supply/BAT0/power_now", "r");
-	perffile = fopen("/sys/devices/system/cpu/intel_pstate/no_turbo", "r"); // The perforamnce file. Ideally contains only one character
 
 	printf("{\"version\": 1,\"click_events\": true}\n");
 	printf("[\n");
 	printf("[],\n");
 	do {
-		printJSON(getperf(perffile), atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, atoi(powerfile)/1000000.0);
+		printJSON(atoi(batfile), getcolour(colourfile), fdate(), atoi(tempfile)/1000, atoi(powerfile)/1000000.0);
 
 		// set file cursor back to beginning
 		fseek(colourfile, 0, SEEK_SET);
 		fseek(batfile, 0, SEEK_SET);
 		fseek(tempfile, 0, SEEK_SET);
 		fseek(powerfile, 0, SEEK_SET);
-		fseek(perffile, 0, SEEK_SET);
 	}
 	while (sleep(5) == 0);
 }
 
 // print the JSON output and flush buffer
-void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int temp, float power) {
+void printJSON(int battery, char *batcolour, char *date, int temp, float power) {
 	printf("\
 	[\
-		{\
-			\"full_text\": \" \",\
-			\"background\": \"#%s\",\
-			\"align\": \"center\",\
-			\"color\": \"#000000\"\
-		},\
 		{\
 			\"full_text\": \"%d%%\",\
 			\"background\": \"#%s\",\
@@ -67,31 +59,11 @@ void printJSON(char *perfcolour, int battery, char *batcolour, char *date, int t
 			\"color\": \"#000000\",\
 			\"align\": \"center\"\
 		}\
-	],\n", perfcolour, battery, batcolour, power, temp, date);
+	],\n" battery, batcolour, power, temp, date);
 
 	// MAGIC
 	fflush(stdout);
 	// MAGIC END
-}
-
-/*
-Read /sys/devices/system/cpu/intel_pstate/no_turbo
-
-if it's 0, then in performance mode, else powersave.
-
-Notice that this is an exact copy of the getcolour function. I have however,
-chose to keep this 2 seperate functions, rather than a single function with 3
-additional arguments.
-*/
-char* getperf(FILE *fp) {
-	char c = getc(fp);
-	fseek(fp, 0, SEEK_END);
-
-	// 0 - turbo enabled, in performance mode
-	if (c == '0') {
-		return "cc8624";
-	}
-	return "000000";
 }
 
 /*
